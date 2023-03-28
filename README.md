@@ -1,0 +1,11 @@
+# Kaitai Struct: runtime library for Awkward Arrays
+
+This library implements Kaitai Struct API for Awkward Arrays.
+
+Kaitai Struct is a declarative language used for describe various binary
+data structures, laid out in files or in memory: i.e. binary file
+formats, network stream packet formats, etc.
+
+Further reading:
+
+* [About Kaitai Struct](http://kaitai.io/)
