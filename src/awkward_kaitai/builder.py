@@ -57,6 +57,7 @@ def build_with_cmake(
     main_path: pathlib.Path,
     dest_path: pathlib.Path,
     configure_path: pathlib.Path | None,
+    debug: bool,
 ) -> None:
     """Build an awkward-kaitai shared-object from the given paths"""
     try:
@@ -105,18 +106,25 @@ def build_with_cmake(
         # Prepare build
         build_path = temp_path / "build"
 
+        command = [
+            cmake_path,
+            "-S",
+            str(temp_path),
+            "-B",
+            str(build_path),
+            f"-DKAITAI_MAIN_FILE={main_path.resolve()}",
+            f"-DCMAKE_INSTALL_PREFIX={dest_path.resolve()}",
+            f"-DAWKWARD_VERSION={get_awkward_version()}",
+        ]
+
+        if debug:
+            command += [
+                "-DCMAKE_BUILD_TYPE=Debug",
+                "-DCMAKE_CXX_FLAGS='-ggdb'",
+            ]
         # Configure CMake
         subprocess.run(
-            [
-                cmake_path,
-                "-S",
-                str(temp_path),
-                "-B",
-                str(build_path),
-                f"-DKAITAI_MAIN_FILE={main_path.resolve()}",
-                f"-DCMAKE_INSTALL_PREFIX={dest_path.resolve()}",
-                f"-DAWKWARD_VERSION={get_awkward_version()}",
-            ],
+            command,
             check=True,
         )
 
@@ -146,12 +154,17 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "-b", "--build", type=pathlib.Path, help="explicitly specify a build location"
     )
+    parser.add_argument(
+        "--debug",
+        action=argparse.BooleanOptionalAction,
+        help="build with debug symbols",
+    )
 
     args = parser.parse_args(argv)
 
     dest = args.file.parent if args.dest is None else args.dest
 
-    build_with_cmake(args.file, dest, args.build)
+    build_with_cmake(args.file, dest, args.build, args.debug)
 
 
 if __name__ == "__main__":

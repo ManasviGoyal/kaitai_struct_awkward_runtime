@@ -1,6 +1,7 @@
 .PHONY: list test all clean
 
-BUILD = local/bin/awkward-kaitai-build
+# Remove --debug to strip debugging symbols from the library
+BUILD = local/bin/awkward-kaitai-build --debug
 JAVA_CLASSES = kaitai_struct_compiler/jvm/target/scala-2.12/classes/io/kaitai/struct
 
 # This path only works on Linux, need to make it compatible with WSL as well
@@ -14,6 +15,8 @@ compile_test: # define testcase environment variable
 	rm -f test_artifacts/lib$(testcase).so
 	PYTHONPATH=$$PYTHONPATH:local $(BUILD) test_artifacts/$(testcase).cpp -b build
 	pytest tests/test_$(testcase).py
+
+cpp: $(foreach ksy,$(KSY),test_artifacts/$(ksy).cpp)
 
 test_artifacts/lib%.so: test_artifacts/%.cpp $(BUILD)
 	PYTHONPATH=$$PYTHONPATH:local $(BUILD) $< -b build
